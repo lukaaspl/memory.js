@@ -12,21 +12,87 @@ html,
 body {
     font-family: 'Roboto Condensed', sans-serif;
     font-size: 20px;
+    height: 100vh;
 }
 
 header {
+    display: flex;
     background-color: rgb(233, 233, 233);
     border-bottom: 1px solid #aaa;
-    height: 60px;
-    line-height: 60px;
+    align-items: center;
+    justify-content: space-between;
 
     .logo {
-        width: 100%;
-        max-width: 1024px;
-        margin: 0 auto;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
 
-        h1 {
-            text-align: left;
+        img {
+            width: 32px;
+            margin-right: 8px;
+        }
+
+        h1>span {
+            color: rgb(236, 170, 38);
+        }
+    }
+
+    .game-time {
+        margin-right: 20px;
+        font-size: 1.2rem;
+        opacity: 0;
+        transition: opacity .5s;
+
+        span.clock {
+            font-weight: bold;
+        }
+    }
+}
+
+main {
+    height: calc(100% - 61px);
+    padding: 10px;
+}
+
+.board {
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+
+    .card {
+        background-color: gray;
+        flex-basis: 12.5%;
+        flex-grow: 1;
+        border: 2px solid #fff;
+        position: relative;
+        transition: .2s;
+        cursor: pointer;
+
+        &:hover:not(.inverted) {
+            opacity: .9;
+        }
+
+        &.inverted {
+            transform: rotateY(180deg);
+            cursor: default;
+        }
+
+        h3.color-desc {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            background-color: rgba(0, 0, 0, .6);
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: .9em;
+            transform: translate(-50%, -50%) rotateY(180deg);
+            pointer-events: none;
+        }
+
+        @media (orientation: portrait) {
+            flex-basis: 25%;
         }
     }
 }
