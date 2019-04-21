@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Memory.js</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" href="css/main.css">
 </head>
 
@@ -15,17 +17,128 @@
             <img src="./assets/sd-card.png" alt="SD Card">
             <h1><span>M</span>emory.js</h1>
         </div>
-        <div class="game-time">
-            You <span class="to-be">are</span> playing for <span class="clock">1</span> seconds
+        <div class="hamburger-icon menu-toggler">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     </header>
 
     <main>
-        <div class="board">
+        <div class="overlay"></div>
 
+        <div class="board">
+            <div class="modal"></div>
+            <div class="intro">
+                <fieldset>
+                    <legend>Welcome to the <span>M</span>emory.js</legend>
+                    <p>The memory puzzle game can help you relax, but also greatly trains your memory and concentration.
+                    </p>
+                    <p>The key is to focus on the best possible remembering colors, not on clicking on the cards in the
+                        shortest possible time.</p>
+                    <p>Choose the level of difficulty for yourself and have much fun!</p>
+                    <form class="difficulty-level">
+                        <div class="radio-block">
+                            <label for="easy">
+                                <input type="radio" name="difficulty" id="easy">
+                                Trivial
+                            </label>
+                        </div>
+                        <div class="radio-block">
+                            <label for="normal">
+                                <input type="radio" name="difficulty" id="normal" checked>
+                                Regular
+                            </label>
+                        </div>
+                        <div class="radio-block">
+                            <label for="hard">
+                                <input type="radio" name="difficulty" id="hard">
+                                Impassable
+                            </label>
+                        </div>
+                        <div class="level-description-box">
+                            <div data-level="easy" class="level-description">
+                                <ul>
+                                    <li>Only 12 pairs</li>
+                                    <li>HEX codes on cards</li>
+                                    <li>Long preview</li>
+                                </ul>
+                            </div>
+                            <div data-level="normal" class="level-description active">
+                                <ul>
+                                    <li>Regular 16 pairs</li>
+                                    <li>HEX codes on cards</li>
+                                    <li>Normal preview</li>
+                                </ul>
+                            </div>
+                            <div data-level="hard" class="level-description">
+                                <ul>
+                                    <li>Hell a lot of pairs</li>
+                                    <li>Unmarked cards</li>
+                                    <li>No preview</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <button>
+                            <i class="fas fa-puzzle-piece"></i>
+                            Puzzle it!
+                        </button>
+
+                    </form>
+                    <div class="circle"></div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="menu">
+            <div class="logo">
+                <img src="./assets/sd-card.png" alt="SD Card">
+                <h2><span>M</span>emory.js</h2>
+            </div>
+            <nav>
+                <section>
+                    <h3>Menu</h3>
+                    <ul class="nav-menu">
+                        <li>
+                            <button data-action="new-game">
+                                <i class="fas fa-puzzle-piece"></i>
+                                New game
+                            </button>
+                        </li>
+                        <li>
+                            <button data-action="pause" disabled>
+                                <i class="fas fa-pause"></i>
+                                Pause
+                            </button>
+                        </li>
+                        <li>
+                            <button data-action="sound">
+                                <i class="fas fa-volume-up"></i>
+                                Sound: on
+                            </button>
+                        </li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Statistics</h3>
+                    <ul class="statistics">
+                        <li>
+                            <i class="fas fa-check-double"></i>Pairs:
+                            <div>
+                                <span class="pairsFound">0</span> /
+                                <span class="pairsTotal">0</span>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-thumbs-down"></i>Missed:<div><span class="pairsMissed">0</span></div>
+                        </li>
+                        <li>
+                            <i class="fas fa-hourglass"></i>Time:<div><span class="gameTime">0</span> sec</div>
+                        </li>
+                    </ul>
+                </section>
+            </nav>
         </div>
     </main>
-
     <script src="memory.js"></script>
 </body>
 

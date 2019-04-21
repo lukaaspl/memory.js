@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto+Condensed');
 
+$orangeColor: rgb(236, 170, 38);
+$font: 'Roboto Condensed',
+sans-serif;
+
 *,
 *::before,
 *::after {
@@ -10,9 +14,10 @@
 
 html,
 body {
-    font-family: 'Roboto Condensed', sans-serif;
+    font-family: $font;
     font-size: 20px;
     height: 100vh;
+    overflow: hidden;
 }
 
 header {
@@ -27,6 +32,11 @@ header {
         display: flex;
         align-items: center;
         padding: 0 20px;
+        transition: .3s;
+
+        &.menu-active {
+            transform: translateX(-100%);
+        }
 
         img {
             width: 32px;
@@ -34,18 +44,67 @@ header {
         }
 
         h1>span {
-            color: rgb(236, 170, 38);
+            color: $orangeColor;
         }
     }
 
-    .game-time {
+    .hamburger-icon {
+        width: 45px;
+        height: 30px;
+        position: relative;
         margin-right: 20px;
-        font-size: 1.2rem;
-        opacity: 0;
-        transition: opacity .5s;
+        transform: rotate(0);
+        transition: .5s ease-in-out;
+        cursor: pointer;
 
-        span.clock {
-            font-weight: bold;
+        &:hover {
+            span {
+                background-color: rgb(219, 153, 20);
+            }
+        }
+
+        span {
+            display: block;
+            position: absolute;
+            height: 7px;
+            width: 100%;
+            background-color: rgb(238, 174, 47);
+            border-radius: 7px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0);
+            transition: .25s ease-in-out;
+
+            &:nth-child(1) {
+                top: 0;
+            }
+
+            &:nth-child(2) {
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            &:nth-child(1) {
+                top: 100%;
+                transform: translateY(-100%);
+            }
+        }
+
+        &.active {
+            span:nth-child(1) {
+                top: 50%;
+                transform: translateY(-50%) rotate(135deg);
+            }
+
+            span:nth-child(2) {
+                opacity: 0;
+                left: -30px;
+            }
+
+            span:nth-child(3) {
+                top: 50%;
+                transform: translateY(-50%) rotate(-135deg);
+            }
         }
     }
 }
@@ -53,12 +112,301 @@ header {
 main {
     height: calc(100% - 61px);
     padding: 10px;
+    position: relative;
+}
+
+.menu {
+    position: absolute;
+    text-align: center;
+    right: 0;
+    padding: 50px 10px;
+    top: -1px;
+    bottom: 0;
+    width: 300px;
+    transform: translateX(100%);
+    transition: .3s;
+    background-color: rgb(233, 233, 233);
+    border-left: 1px solid #aaa;
+
+    &.active {
+        transform: translateX(0);
+    }
+
+    .logo {
+        margin-bottom: 40px;
+
+        h2 {
+            font-size: 2rem;
+        }
+
+        h2>span {
+            color: $orangeColor;
+        }
+
+        img {
+            width: 50px;
+            transform: translateY(5px);
+        }
+    }
+
+    nav {
+        section {
+            margin-bottom: 50px;
+
+            h3 {
+                font-size: 1.5rem;
+                border-bottom: 1px solid #bbb;
+                width: 50%;
+                margin: 20px auto;
+                padding-bottom: 5px;
+            }
+
+            ul {
+                list-style: none;
+            }
+        }
+    }
+
+    .nav-menu {
+        button {
+            position: relative;
+            margin: 10px 0;
+            font-size: 1rem;
+            font-family: $font;
+            width: 50%;
+            padding: 5px 0 5px 42px;
+            border: 1px solid #aaa;
+            outline: none;
+            cursor: pointer;
+            border-radius: 3px;
+            background-color: #ddd;
+            text-align: left;
+
+            i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+            }
+
+            &:disabled {
+                cursor: default;
+            }
+
+            &:hover:not(:disabled) {
+                background-color: $orangeColor;
+                color: #fff;
+            }
+        }
+    }
+
+    .statistics {
+        width: 50%;
+        margin: 0 auto;
+
+        li {
+            margin: 20px 0;
+            font-size: 1rem;
+
+
+            i {
+                margin-right: 8px;
+            }
+
+            div {
+                text-align: center;
+                display: block;
+                background-color: #ccc;
+                margin: 10px auto;
+                border-radius: 10px;
+                padding: 3px 0;
+                font-size: 1.1rem;
+                font-weight: bold;
+                width: 80%;
+            }
+        }
+    }
 }
 
 .board {
+    position: relative;
     height: 100%;
     display: flex;
     flex-wrap: wrap;
+    flex-grow: 1;
+    transition: padding .3s;
+
+    &::after {
+        content: 'Paused';
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-size: 3rem;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, .8);
+        transition: .3s;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    &.overlayed {
+        &::after {
+            opacity: 1;
+            pointer-events: all;
+        }
+    }
+
+    &.menu-active {
+        padding-right: 300px;
+
+        &::after {
+            right: 300px;
+        }
+
+        .intro {
+            transform: translate(calc(-50% - 150px), -35%);
+        }
+    }
+
+    .intro {
+        position: absolute;
+        left: 50%;
+        top: 35%;
+        transform: translate(-50%, -35%);
+        text-align: center;
+        transition: .3s;
+        width: 50%;
+
+        &.hidden {
+            opacity: 0;
+        }
+
+        fieldset {
+            border: 3px solid $orangeColor;
+            border-radius: 5px;
+            padding: 20px 20px 40px;
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+
+            legend {
+                font-size: 2.5rem;
+                padding: 0 20px;
+
+                span {
+                    color: $orangeColor;
+                }
+            }
+
+            &>p {
+                font-size: 1.1rem;
+                margin: 10px auto;
+                color: #333;
+
+                &::before {
+                    content: '→';
+                    margin-right: 15px;
+                    vertical-align: -2px;
+                    font-size: 1.8rem;
+                    color: $orangeColor;
+                }
+            }
+
+            .circle {
+                position: absolute;
+                right: 0;
+                bottom: 0;
+                width: 11vw;
+                height: 11vw;
+                transform: translate(50%, 50%);
+                background-color: orange;
+                border-radius: 50%;
+                z-index: -1;
+            }
+        }
+
+        form {
+            margin-top: 30px;
+
+            button {
+                display: block;
+                border: 1px solid #bbb;
+                color: $orangeColor;
+                background-color: rgb(245, 245, 245);
+                font-size: 1.8rem;
+                font-family: $font;
+                padding: 5px 30px;
+                margin: 40px auto 0px;
+                cursor: pointer;
+                font-weight: bold;
+                text-transform: uppercase;
+                outline: none;
+                transition: .2s;
+
+                &:hover {
+                    background-color: $orangeColor;
+                    color: #fff;
+                }
+            }
+
+            .radio-block {
+                display: inline-block;
+                margin: 0 20px;
+                font-size: 1.2rem;
+
+                input {
+                    width: 20px;
+                    height: 20px;
+                    vertical-align: -2px;
+                    margin-right: 3px;
+                }
+            }
+
+            .level-description-box {
+                margin: 25px auto 0;
+                background-color: $orangeColor;
+                border-radius: 5px;
+                position: relative;
+                height: 80px;
+                width: 80%;
+                overflow: hidden;
+
+                .level-description {
+                    width: 100%;
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(130%);
+                    font-size: 1.1rem;
+                    transition: .1s;
+
+                    &.active {
+                        transform: translateY(-50%);
+                    }
+
+                    ul {
+                        list-style: none;
+                        display: flex;
+                        justify-content: space-around;
+                        align-items: center;
+                        color: #333;
+
+                        li::before {
+                            content: '★';
+                            color: #fff;
+                            margin-right: 5px;
+                            vertical-align: 1px;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     .card {
         background-color: gray;
@@ -68,6 +416,13 @@ main {
         position: relative;
         transition: .2s;
         cursor: pointer;
+        overflow: hidden;
+
+        &.hidden {
+            transform: translateY(-20px);
+            pointer-events: none;
+            opacity: 0;
+        }
 
         &:hover:not(.inverted) {
             opacity: .9;
@@ -76,6 +431,16 @@ main {
         &.inverted {
             transform: rotateY(180deg);
             cursor: default;
+        }
+
+        img {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 40%;
+            opacity: .3;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
         }
 
         h3.color-desc {
