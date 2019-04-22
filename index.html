@@ -5,13 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Memory.js</title>
+    <title>Memory.js | Puzzle Game</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="ico/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="ico/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="ico/favicon-16x16.png">
+    <link rel="manifest" href="ico/site.webmanifest">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
         integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
+    <div class="loading-scene">
+        <div class="loading-logo">
+            <img src="./assets/sd-card.png" alt="SD Card" class="sd-card">
+            <h1><span>M</span>emory.js</h1>
+            <img src="./assets/loading.gif" alt="SD Card" class="loader">
+        </div>
+    </div>
     <header>
         <div class="logo">
             <img src="./assets/sd-card.png" alt="SD Card">
@@ -26,15 +37,16 @@
 
     <main>
         <div class="overlay"></div>
-
         <div class="board">
-            <div class="modal"></div>
-            <div class="intro">
+            <div class="modal hidden"></div>
+            <div class="intro hidden">
                 <fieldset>
                     <legend>Welcome to the <span>M</span>emory.js</legend>
-                    <p>The memory puzzle game can help you relax, but also greatly trains your memory and concentration.
+                    <p>The memory puzzle game can help you relax, but also greatly trains your memory and
+                        concentration.
                     </p>
-                    <p>The key is to focus on the best possible remembering colors, not on clicking on the cards in the
+                    <p>The key is to focus on the best possible remembering colors, not on clicking on the cards in
+                        the
                         shortest possible time.</p>
                     <p>Choose the level of difficulty for yourself and have much fun!</p>
                     <form class="difficulty-level">
@@ -75,7 +87,7 @@
                                 <ul>
                                     <li>Hell a lot of pairs</li>
                                     <li>Unmarked cards</li>
-                                    <li>No preview</li>
+                                    <li>Short preview</li>
                                 </ul>
                             </div>
                         </div>
@@ -139,7 +151,14 @@
             </nav>
         </div>
     </main>
-    <script src="memory.js"></script>
+    <footer class="hidden">
+        <p>&copy; 2019 puzzles solved by
+            <a href="https://github.com/lukaaspl" target="_blank"><span class="author">Łukasz Roman</span></a> and
+            <a href="http://vanilla-js.com/" target="_blank"><img src="assets/vanillajs.png" alt="Vanilla JS"></a>
+        </p>
+    </footer>
+
+    <script src="/js/main.js"></script>
 </body>
 
 </html>

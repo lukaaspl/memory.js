@@ -1,1 +1,4 @@
-css/*.map
+/css/main.css.map
+/node_modules
+/build
+/.cache

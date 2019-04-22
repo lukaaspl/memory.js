@@ -5,6 +5,11 @@
  * Relased under MIT license
  */
 
+import Statistics from './Statistics';
+import Sound from './Sound';
+import Interface from './Interface';
+import cardBackground from '../assets/card-bg.png';
+
 class Memory {
     constructor(containerNode, difficultyLevel) {
         this.containerNode = containerNode;
@@ -16,29 +21,29 @@ class Memory {
         this.secondCard = '';
 
         // set configuration depending on difficulty level:
-        // pairs number, hex codes yes or not, preview time
+        // pairs number, hex codes yes or not, preview time or its lack
         this.difficultyLevel = difficultyLevel;
 
         switch (this.difficultyLevel) {
             case 'easy':
                 this.pairs = 12;
                 this.hexCode = true;
-                this.previewTime = 3000;
+                this.previewTime = 4000;
                 break;
             case 'normal':
                 this.pairs = 16;
                 this.hexCode = true;
-                this.previewTime = 2000;
+                this.previewTime = 3000;
                 break;
             case 'hard':
-                this.pairs = 28;
+                this.pairs = 20;
                 this.hexCode = false;
-                this.previewTime = false;
+                this.previewTime = 2000;
                 break;
             default:
                 this.pairs = 16;
                 this.hexCode = true;
-                this.previewTime = 1000;;
+                this.previewTime = 3000;
         }
 
         // array with pairs which were found
@@ -48,13 +53,14 @@ class Memory {
         this.statistics = new Statistics(this.pairs);
 
         // card background img tag
-        this.cardBackgroundImageTag = '<img src="../assets/card-bg.png" alt="">';
+        this.cardBackgroundImageTag = `<img src="${cardBackground}" alt="">`;
 
         // create music objects to have access to game sounds
         this.sound = new Sound();
-        this.sound.setVolume(0.6);
+        this.sound.setVolume(0.4);
 
-        this.invertCard = this.invertCard.bind(this);
+        // pause game button node
+        this.pauseButtonNode = document.querySelector('button[data-action="pause"]');
     }
 
     // render cards divs elements
@@ -110,6 +116,7 @@ class Memory {
         // double array to make every color have a pair
         const pairedColorsArray = colorsArray.concat(colorsArray);
 
+        // function returns object maybe for future purposes
         return {
             pairedColors: pairedColorsArray,
             colors: colorsArray,
@@ -119,7 +126,9 @@ class Memory {
 
     // fill cards with generated colors
     fillCards() {
-        const cards = document.querySelectorAll('.card');
+        this.cardsNodes = document.querySelectorAll('.card');
+
+        const cards = this.cardsNodes;
         const colors = this.createColorsArray();
         const pairedColors = colors.pairedColors;
         const creationTime = colors.time;
@@ -148,10 +157,8 @@ class Memory {
 
         // switch game state to on if it's first click
         if (!this.gameActive) {
-            const pauseButton = document.querySelector('button[data-action="pause"]');
-
+            this.pauseButtonNode.removeAttribute('disabled');
             this.gameOn(true);
-            pauseButton.removeAttribute('disabled');
         }
 
         const cardBackgroundColor = card.getAttribute('data-card-color');
@@ -223,14 +230,45 @@ class Memory {
             card.innerHTML = `<h3 class="color-desc">${cardBackgroundColor}</h3>`;
     }
 
+    // preview cards before game is on
     preview() {
+        // do not preview as it's set in difficulty level config 
         if (!this.previewTime)
             return false;
 
-        const cards = document.querySelectorAll('.card');
+        this.cardsNodes.forEach(card => this.invertCard(card));
+        setTimeout(() => {
+            this.coverInvertedCards();
+            this.containerNode.classList.remove('overlayed');
+        }, this.previewTime);
+    }
 
-        cards.forEach(card => this.invertCard(card));
-        setTimeout(() => this.coverInvertedCards(), this.previewTime);
+    // handing out cards animation
+    handOutCards() {
+        const cards = this.cardsNodes;
+
+        // set single card animation time [ms]
+        const handOutCardTime = 30;
+
+        // set time after which preview is on after handing out cards animation 
+        const timeBeforePreview = (cards.length * handOutCardTime) + 800;
+
+        // if preview is enabled, make cards overlayed that they can not be clicked
+        if (this.previewTime)
+            this.containerNode.classList.add('overlayed');
+
+        // hide cards
+        cards.forEach((card, index) => {
+            card.classList.add('hidden');
+
+            // hand out cards
+            setTimeout(() => (
+                card.classList.remove('hidden')
+            ), handOutCardTime * index);
+        });
+
+        // turn on preview
+        setTimeout(() => this.preview(), timeBeforePreview);
     }
 
     // cover inverted cards
@@ -262,9 +300,8 @@ class Memory {
         // check if there still are pairs to uncover
         if (this.pairs === 0) {
             this.gameOn(false);
-
-            const pauseButton = document.querySelector('button[data-action="pause"]');
-            pauseButton.setAttribute('disabled', '');
+            this.pauseButtonNode.setAttribute('disabled', '');
+            this.finishScene.call(new Interface(), this.statistics, this);
         }
     }
 
@@ -274,211 +311,128 @@ class Memory {
         this.secondCard = '';
         this.cardPicked = 'none';
     }
-}
 
-// class for managing statistics
-class Statistics {
-    constructor(pairsTotal) {
-        // HTML references to statistic fields
-        this.nodes = {
-            pairsTotal: document.querySelector('.pairsTotal'),
-            foundPairs: document.querySelector('.pairsFound'),
-            missedPairs: document.querySelector('.pairsMissed'),
-            gameTime: document.querySelector('.gameTime'),
-        };
+    // function called with context of interface object so "this" means interface instance
+    // parameters are references to other needed classes
+    finishScene(statistics, memory) {
+        // generating stars depending on game result
+        const drawStars = (stars) => {
+            const starsMax = 5;
+            const starFilled = '<i class="fas fa-star"></i>';
+            const starContour = '<i class="far fa-star"></i>';
+            const contourStarsToDraw = starsMax - stars;
+            let outcome = '';
 
-        // set how many pairs are on the board
-        this.nodes.pairsTotal.textContent = pairsTotal;
+            for (let i = 0; i < stars; i++)
+                outcome += starFilled;
 
-        // statistics
-        this.foundPairs = 0;
-        this.missedPairs = 0;
-        this.gameTime = 0;
-    }
+            for (let i = 0; i < contourStarsToDraw; i++)
+                outcome += starContour;
 
-    // start/continue counting time
-    startTime() {
-        this.timeInterval = setInterval(() => {
-            ++this.gameTime;
-            this.nodes.gameTime.textContent = this.gameTime;
-        }, 1000);
-    }
-
-    // pause counting time
-    pauseTime() {
-        clearInterval(this.timeInterval);
-    }
-
-    // add missed pair
-    addMissedPair() {
-        ++this.missedPairs;
-        this.nodes.missedPairs.textContent = this.missedPairs;
-    }
-
-    // add found pair
-    addFoundPair() {
-        ++this.foundPairs;
-        this.nodes.foundPairs.textContent = this.foundPairs;
-    }
-}
-
-// class for managing interface
-class Interface {
-    constructor() {
-        this.nodes = {
-            board: document.querySelector('.board'),
-            menuToggleButton: document.querySelector('.menu-toggler'),
-            menuBar: document.querySelector('.menu'),
-            logo: document.querySelector('header > .logo'),
-            menuButtons: document.querySelectorAll('.nav-menu button'),
-            intro: document.querySelector('.intro'),
-            difficultyLevelForm: document.querySelector('.difficulty-level'),
-            difficultyDescription: document.querySelector('.level-description-box'),
+            return outcome;
         }
 
-        this.nodes.menuToggleButton
-            .addEventListener('click', this.menuToggle.bind(this));
+        // get statistics to display
+        const foundPairs = statistics.foundPairs;
+        const missedPairs = statistics.missedPairs;
+        const gameTime = statistics.gameTime;
 
-        this.nodes.menuButtons.forEach(menuButton => {
-            menuButton.addEventListener('click', evt => this.captureMenuButton(evt));
-        });
+        // specify a few statistics based on the result
+        const secondsPerPair = (gameTime / foundPairs).toFixed(2);
+        const efficiency = Math.floor(((foundPairs * 100) / (foundPairs + missedPairs)));
 
-        this.introduction();
+        // and give them the right number of stars
+        let starsForTime = 1;
+        let starsForEfficiency = 5;
+
+        if (secondsPerPair < 2)
+            starsForTime = 5;
+        else if (secondsPerPair <= 4)
+            starsForTime = 4;
+        else if (secondsPerPair <= 6)
+            starsForTime = 3;
+        else if (secondsPerPair <= 8)
+            starsForTime = 2;
+
+        if (efficiency < 20)
+            starsForEfficiency = 1;
+        else if (efficiency <= 40)
+            starsForEfficiency = 2;
+        else if (efficiency <= 60)
+            starsForEfficiency = 3;
+        else if (efficiency <= 80)
+            starsForEfficiency = 4;
+
+        // finish scene markup which is forwarding to interface's modal method
+        const finishSceneMarkup = (
+            `<div class="finish-scene">
+            <h2><i class="fas fa-trophy"></i> Congratulations!</h2>
+    
+            <p>You have successfully completed the game with the following result:</p>
+    
+            <div class="game-result">
+                <p>
+                    You discovered <span>${foundPairs} pairs</span> in <span>${gameTime} seconds</span>
+                    and you were wrong <span>${missedPairs} times:</span>
+                </p>
+                <div class="stars">
+                    <div class="star-section">
+                        <span>It gives <strong>1 pair per ${secondsPerPair} seconds</strong></span>
+                        <span>${drawStars(starsForTime)}</span>
+                    </div>
+                    <div class="star-section">
+                        <span>It gives <strong>${efficiency}% efficiency</strong></span>
+                        <span>${drawStars(starsForEfficiency)}</span>
+                    </div>
+                </div>
+            </div>
+    
+            <button id="play-again-btn">Play again</button>
+    
+            </div>`
+        );
+
+        // show modal when game is finished
+        setTimeout(() => {
+            this.openModal(finishSceneMarkup);
+            memory.sound.victory();
+
+            // and set listener to "play again" button
+            const playAgainButton = document.getElementById('play-again-btn');
+
+            playAgainButton.addEventListener('click', () => {
+                memory.breakGame();
+                this.introduction(false);
+                this.closeModal();
+            });
+        }, 500);
     }
 
-    startGame(pickedLevel) {
-        this.memory = new Memory(this.nodes.board, pickedLevel);
-        this.memory.renderCards();
-        this.memory.fillCards();
-        this.statistics = this.memory.statistics;
-        this.sound = this.memory.sound;
+    // breaking game method
+    breakGame() {
 
-        const cards = document.querySelectorAll('.card');
-
-        cards.forEach((card, index) => {
-            card.classList.add('hidden');
-            setTimeout(() => card.classList.remove('hidden'), 20 * index);
-        });
-
-        const enterTime = cards.length * 20;
-        setTimeout(() => this.memory.preview(), enterTime + 1000);
-    }
-
-    menuToggle() {
-        this.nodes.menuToggleButton.classList.toggle('active');
-        this.nodes.menuBar.classList.toggle('active');
-        this.nodes.board.classList.toggle('menu-active');
-        this.nodes.logo.classList.toggle('menu-active');
-    }
-
-    captureMenuButton(evt) {
-        const action = evt.target.dataset.action;
-
-        switch (action) {
-            case 'new-game':
-                // new game button
-                break;
-            case 'pause':
-                // continue/pause button
-                if (this.memory.gameActive) {
-                    this.memory.gameActive = false;
-                    this.nodes.board.classList.add('overlayed');
-                    this.statistics.pauseTime();
-                    evt.target.innerHTML = '<i class="fas fa-play"></i> Continue';
-                } else {
-                    this.memory.gameActive = true;
-                    this.nodes.board.classList.remove('overlayed');
-                    this.statistics.startTime();
-                    evt.target.innerHTML = '<i class="fas fa-pause"></i> Pause';
-                }
-                break;
-            case 'sound':
-                // mute/unmute button
-                if (this.sound.muted) {
-                    this.sound.unmute();
-                    evt.target.innerHTML = '<i class="fas fa-volume-up"></i> Sound: on';
-                } else {
-                    this.sound.mute();
-                    evt.target.innerHTML = '<i class="fas fa-volume-mute"></i> Sound: off';
-                }
-                break;
-            default:
-                return false;
+        // when game stopped while being paused
+        if (!this.gameActive) {
+            this.containerNode.classList.remove('paused');
+            this.pauseButtonNode.innerHTML = '<i class="fas fa-pause"></i> Pause';
         }
-    }
 
-    introduction() {
-        const intro = this.nodes.intro;
-        const difficultyForm = this.nodes.difficultyLevelForm;
-        const difficultyDescription = this.nodes.difficultyDescription;
-        let pickedLevel = 'normal';
+        // when game stopped while finish scene was active
+        if (this.containerNode.classList.contains('overlayed'))
+            this.containerNode.classList.remove('overlayed');
 
-        difficultyForm.addEventListener('change', evt => {
-            pickedLevel = evt.target.id;
-            const activeDesc = difficultyDescription.querySelector('.active');
-            const descToLoad = difficultyDescription.querySelector(`[data-level=${pickedLevel}]`);
+        // hide cards, reset statistics and disable pause button
+        this.cardsNodes.forEach(card => card.classList.add('hidden'));
+        this.statistics.resetStatistics();
+        this.pauseButtonNode.setAttribute('disabled', '');
 
-            activeDesc.classList.remove('active');
-            setTimeout(() => descToLoad.classList.add('active'), 100);
-        });
-
-        difficultyForm.addEventListener('submit', evt => {
-            evt.preventDefault();
-            intro.classList.add('hidden');
-            this.startGame(pickedLevel);
-        })
+        // delete cards nodes for better optimization
+        setTimeout(() => {
+            this.cardsNodes.forEach(card => {
+                this.containerNode.removeChild(card);
+            });
+        }, 200);
     }
 }
 
-class Sound {
-    constructor() {
-        this.defaultVolume = 0.5;
-        this.muted = false;
-
-        this.sounds = {
-            pop: new Audio('./assets/pop.wav'),
-            negative: new Audio('./assets/negative.wav'),
-            positive: new Audio('./assets/positive.wav'),
-        }
-    }
-
-    setVolume(volume) {
-        if (volume < 0 || volume > 1)
-            return false;
-
-        this.defaultVolume = volume;
-
-        for (let key in this.sounds)
-            this.sounds[key].volume = volume;
-    }
-
-    mute() {
-        this.muted = true;
-
-        for (let key in this.sounds)
-            this.sounds[key].muted = true;
-    }
-
-    unmute() {
-        this.muted = false;
-
-        for (let key in this.sounds)
-            this.sounds[key].muted = false;
-    }
-
-    pop() {
-        this.sounds.pop.play();
-    }
-
-    negative() {
-        this.sounds.negative.play();
-    }
-
-    positive() {
-        this.sounds.positive.play();
-    }
-}
-
-/*  INIT  */
-
-const interface = new Interface();
+export default Memory;
